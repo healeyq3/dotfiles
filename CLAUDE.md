@@ -21,7 +21,11 @@ Personal dotfiles repo for macOS (zsh) and Ubuntu (bash). Config files live here
 - When adding a config file, copy it into the repo, add a `links` entry (shared or OS-specific), and run `./install.sh`. Keep README.md's structure tree in sync.
 - When adding a package, add it to both `Brewfile` and `packages/apt.txt` if it's wanted on both. Names can differ (e.g. `poppler` vs `poppler-utils`).
 - The files in `~` are symlinks into this repo, so editing `~/.zshrc` edits the repo file directly.
-- Guard sourcing of tool-specific files with an existence check (`[ -f path ] && . path`) so the config works on machines without that tool.
+- Guard everything machine-specific so the config works on machines without that tool. README's Portability section lists the current guards; keep that table in sync.
+  - Sourcing a file: `[ -f path ] && . path`.
+  - Adding to PATH: `[ -d dir ] && export PATH="dir:$PATH"`.
+  - Tool aliases: `command -v tool`.
+  - Always use `$HOME`, never `/Users/quill`.
 - Gate OS-specific settings with `case "$(uname -s)"`.
 - `install.sh` and `packages.sh` must stay compatible with macOS's bash 3.2: no associative arrays, no `readlink -f`, no `mapfile`. `bash/bashrc` only runs on Ubuntu (bash 5), and gitstatus requires bash 4+.
 - The bashrc prompt disables `promptvars` and escapes backslashes in branch and directory names. The zshrc relies on `no_prompt_subst` and escapes `%`. Don't remove either; they stop branch or directory names from injecting code into the prompt.

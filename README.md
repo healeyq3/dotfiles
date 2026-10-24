@@ -108,8 +108,29 @@ Use `git config --file ~/.gitconfig.local ...` for anything machine-specific or 
 
 ## Portability
 
-Lines that source tool-specific files (uv, cargo, gitstatus) check that the file exists first, so a fresh machine without those tools starts a shell without errors.
-Follow the same pattern for anything machine-specific: `[ -f path ] && . path`.
+Anything that depends on a tool or path that might not exist on a given machine is guarded, so a fresh machine starts a shell without errors or junk on `PATH`:
+
+| What | Where | Guard |
+|---|---|---|
+| pixi | `shell/env` | `[ -d ~/.pixi/bin ]` |
+| uv | `shell/env` | `[ -f ~/.local/bin/env ]` |
+| MacTeX | `zsh/zshrc` | `[[ -d /Library/TeX/texbin ]]` |
+| cargo | `zsh/zshenv`, `bash/bashrc` | `[ -f ~/.cargo/env ]` |
+| gitstatus | `zsh/zshrc`, `bash/bashrc` | `[[ -r <plugin file> ]]` |
+| eza aliases | `shell/aliases` | `command -v eza` |
+| Homebrew shellenv | `zsh/zprofile` | only linked on macOS |
+
+Follow the same patterns for anything new:
+
+```sh
+[ -f "$HOME/path/to/file" ] && . "$HOME/path/to/file"       # sourcing a file
+[ -d "$HOME/some/bin" ] && export PATH="$HOME/some/bin:$PATH"  # adding to PATH
+if command -v tool >/dev/null 2>&1; then alias ...; fi         # aliases for a tool
+```
+
+- **Use `$HOME`:** write `$HOME` instead of `/Users/quill`, since home directories differ between macOS (`/Users/...`) and Linux (`/home/...`).
+- **Sourcing must be guarded:** sourcing a missing file prints an error on every shell start.
+- **PATH entries should be guarded:** a missing `PATH` directory is harmless but clutters `PATH`, so guard those too.
 
 ## Notes
 

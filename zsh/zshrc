@@ -3,7 +3,7 @@
 [[ -f "$HOME/.shell_env" ]] && . "$HOME/.shell_env"
 [[ -f "$HOME/.aliases" ]] && . "$HOME/.aliases"
 
-export PATH="/Library/TeX/texbin:$PATH"
+[[ -d /Library/TeX/texbin ]] && export PATH="/Library/TeX/texbin:$PATH"   # MacTeX
 
 # gitstatus: brew install romkatv/gitstatus/gitstatus
 if [[ -r "$(brew --prefix)/opt/gitstatus/gitstatus.plugin.zsh" ]]; then
