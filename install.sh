@@ -9,12 +9,26 @@ BACKUP="$HOME/.dotfiles_backup/$(date +%Y%m%d-%H%M%S)"
 
 # "path in this repo:path relative to \$HOME"
 links=(
-  "zsh/zshrc:.zshrc"
-  "zsh/zprofile:.zprofile"
-  "zsh/zshenv:.zshenv"
+  "shell/env:.shell_env"
+  "shell/aliases:.aliases"
   "git/gitconfig:.gitconfig"
   "git/ignore:.config/git/ignore"
 )
+
+case "$(uname -s)" in
+  Darwin)
+    links+=(
+      "zsh/zshrc:.zshrc"
+      "zsh/zprofile:.zprofile"
+      "zsh/zshenv:.zshenv"
+    )
+    ;;
+  Linux)
+    links+=(
+      "bash/bashrc:.bashrc"
+    )
+    ;;
+esac
 
 for pair in "${links[@]}"; do
   rel="${pair#*:}"

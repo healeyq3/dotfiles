@@ -1,20 +1,9 @@
+# zsh config (macOS). Shared env and aliases live in ~/.shell_env and ~/.aliases.
 
-[[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
-
-export PATH="/Users/quill/.pixi/bin:$PATH"
+[[ -f "$HOME/.shell_env" ]] && . "$HOME/.shell_env"
+[[ -f "$HOME/.aliases" ]] && . "$HOME/.aliases"
 
 export PATH="/Library/TeX/texbin:$PATH"
-
-alias code='open -a "Visual Studio Code"'
-
-# argo: default author for bin/new
-export ARGO_AUTHOR=quill
-
-
-alias ls='eza --icons'
-alias ll='eza -lh --icons --git'
-alias lll='eza -lTh --level=2 --icons --git'
-alias la='eza -lha --icons --git'
 
 # gitstatus: brew install romkatv/gitstatus/gitstatus
 if [[ -r "$(brew --prefix)/opt/gitstatus/gitstatus.plugin.zsh" ]]; then
@@ -41,7 +30,7 @@ function my_git_prompt() {
     (( VCS_STATUS_NUM_STAGED || VCS_STATUS_NUM_UNSTAGED ||
        VCS_STATUS_NUM_UNTRACKED || VCS_STATUS_NUM_CONFLICTED )) && color='%F{yellow}'
 
-    git=" ${color}"$''" ${branch//\%/%%}%f"
+    git=" ${color}"$'\ue0a0'" ${branch//\%/%%}%f"
     (( VCS_STATUS_COMMITS_BEHIND )) && git+=" %F{cyan}↓${VCS_STATUS_COMMITS_BEHIND}%f"
     (( VCS_STATUS_COMMITS_AHEAD  )) && git+=" %F{cyan}↑${VCS_STATUS_COMMITS_AHEAD}%f"
     (( VCS_STATUS_NUM_CONFLICTED )) && git+=" %F{red}~${VCS_STATUS_NUM_CONFLICTED}%f"

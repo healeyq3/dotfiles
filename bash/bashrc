@@ -1,0 +1,66 @@
+# bash config (Ubuntu). Shared env and aliases live in ~/.shell_env and ~/.aliases.
+
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+[ -f "$HOME/.shell_env" ] && . "$HOME/.shell_env"
+
+# Everything below is for interactive shells only.
+case $- in
+  *i*) ;;
+  *) return ;;
+esac
+
+# Start from Ubuntu's stock bashrc: history settings, lesspipe, dircolors,
+# bash-completion. Our aliases and prompt below override its defaults.
+[ -f /etc/skel/.bashrc ] && . /etc/skel/.bashrc
+
+[ -f "$HOME/.aliases" ] && . "$HOME/.aliases"
+
+# gitstatus: cloned to ~/.local/share/gitstatus by packages.sh
+if [[ -r "$HOME/.local/share/gitstatus/gitstatus.plugin.sh" ]]; then
+  source "$HOME/.local/share/gitstatus/gitstatus.plugin.sh"
+  # Start the background daemon.
+  #   -s/-u/-c -1: count all staged, unstaged and conflicted files (default stops at 1)
+  #   -m -1: check for changes no matter how big the repo is (default skips repos over 100k files)
+  gitstatus_stop && gitstatus_start -s -1 -u -1 -c -1 -m -1
+fi
+
+# Same layout as the zsh prompt: user@host dir  branch ↓↑~+!? ❯
+function my_prompt() {
+  local exit=$?
+  local reset='\[\e[0m\]' gray='\[\e[90m\]' red='\[\e[31m\]' green='\[\e[32m\]'
+  local yellow='\[\e[33m\]' blue='\[\e[34m\]' magenta='\[\e[35m\]' cyan='\[\e[36m\]'
+  local dir='\w' git=''
+
+  if declare -F gitstatus_query >/dev/null && gitstatus_query &&
+     [[ $VCS_STATUS_RESULT == ok-sync ]]; then
+    # Show the path from the repo root, e.g. project/src/api
+    local here root=$VCS_STATUS_WORKDIR
+    here=$(pwd -P)
+    if [[ $here == "$root"* ]]; then
+      dir="${root##*/}${here#"$root"}"
+      dir=${dir//\\/\\\\}
+    fi
+
+    local branch=${VCS_STATUS_LOCAL_BRANCH:-@${VCS_STATUS_COMMIT:0:7}}
+    local color=$green
+    (( VCS_STATUS_NUM_STAGED || VCS_STATUS_NUM_UNSTAGED ||
+       VCS_STATUS_NUM_UNTRACKED || VCS_STATUS_NUM_CONFLICTED )) && color=$yellow
+
+    git=" ${color}"$''" ${branch//\\/\\\\}${reset}"
+    (( VCS_STATUS_COMMITS_BEHIND )) && git+=" ${cyan}↓${VCS_STATUS_COMMITS_BEHIND}${reset}"
+    (( VCS_STATUS_COMMITS_AHEAD  )) && git+=" ${cyan}↑${VCS_STATUS_COMMITS_AHEAD}${reset}"
+    (( VCS_STATUS_NUM_CONFLICTED )) && git+=" ${red}~${VCS_STATUS_NUM_CONFLICTED}${reset}"
+    (( VCS_STATUS_NUM_STAGED     )) && git+=" ${green}+${VCS_STATUS_NUM_STAGED}${reset}"
+    (( VCS_STATUS_NUM_UNSTAGED   )) && git+=" ${yellow}!${VCS_STATUS_NUM_UNSTAGED}${reset}"
+    (( VCS_STATUS_NUM_UNTRACKED  )) && git+=" ${blue}?${reset}"
+  fi
+
+  local arrow=$magenta
+  (( exit )) && arrow=$red
+  PS1="${gray}\u@\h${reset} ${blue}${dir}${reset}${git} ${arrow}❯${reset} "
+}
+
+# PS1 is rebuilt each prompt, so disable $-expansion in it (like zsh's
+# no_prompt_subst) to keep odd branch or directory names from running code.
+shopt -u promptvars
+[[ $PROMPT_COMMAND == *my_prompt* ]] || PROMPT_COMMAND="my_prompt${PROMPT_COMMAND:+; $PROMPT_COMMAND}"

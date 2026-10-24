@@ -1,0 +1,7 @@
+# Ubuntu packages installed by packages.sh (one per line; # starts a comment).
+# Mirrors the Brewfile where an apt equivalent exists.
+git
+curl            # gitstatus downloads its daemon binary on first use
+eza             # Ubuntu 24.04+; older releases need https://github.com/eza-community/eza/blob/main/INSTALL.md
+gh
+poppler-utils   # = brew "poppler"

@@ -1,0 +1,8 @@
+# Environment shared by zsh (macOS) and bash (Ubuntu). Linked to ~/.shell_env.
+# Must stay valid in both shells; machine-specific tools are guarded.
+
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"   # uv
+[ -d "$HOME/.pixi/bin" ] && export PATH="$HOME/.pixi/bin:$PATH"
+
+# argo: default author for bin/new
+export ARGO_AUTHOR=quill

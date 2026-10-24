@@ -1,0 +1,13 @@
+# Aliases shared by zsh (macOS) and bash (Ubuntu). Linked to ~/.aliases.
+# Must stay valid in both shells.
+
+if command -v eza >/dev/null 2>&1; then
+  alias ls='eza --icons'
+  alias ll='eza -lh --icons --git'
+  alias lll='eza -lTh --level=2 --icons --git'
+  alias la='eza -lha --icons --git'
+fi
+
+case "$(uname -s)" in
+  Darwin) alias code='open -a "Visual Studio Code"' ;;
+esac
