@@ -1,0 +1,8 @@
+# Identity is kept out of this repo. Each machine has an untracked
+# ~/.gitconfig.local with [user] name/email (and any machine-specific settings).
+# Note: `git config --global` writes to this file via the symlink; use
+# `git config --file ~/.gitconfig.local ...` for identity instead.
+
+# Keep this include last so local settings override anything above.
+[include]
+	path = ~/.gitconfig.local

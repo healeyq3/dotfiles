@@ -1,0 +1,58 @@
+
+[[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
+
+export PATH="/Users/quill/.pixi/bin:$PATH"
+
+export PATH="/Library/TeX/texbin:$PATH"
+
+alias code='open -a "Visual Studio Code"'
+
+# argo: default author for bin/new
+export ARGO_AUTHOR=quill
+
+
+alias ls='eza --icons'
+alias ll='eza -lh --icons --git'
+alias lll='eza -lTh --level=2 --icons --git'
+alias la='eza -lha --icons --git'
+
+# gitstatus: brew install romkatv/gitstatus/gitstatus
+if [[ -r "$(brew --prefix)/opt/gitstatus/gitstatus.plugin.zsh" ]]; then
+source "$(brew --prefix)/opt/gitstatus/gitstatus.plugin.zsh"
+
+# Start the background daemon.
+#   -s/-u/-c -1: count all staged, unstaged and conflicted files (default stops at 1)
+#   -m -1: check for changes no matter how big the repo is (default skips repos over 100k files)
+gitstatus_stop MY && gitstatus_start -s -1 -u -1 -c -1 -m -1 MY
+
+function my_git_prompt() {
+  emulate -L zsh
+  local dir='%~' git=''
+  if gitstatus_query MY && [[ $VCS_STATUS_RESULT == ok-sync ]]; then
+    # Show the path from the repo root, e.g. project/src/api
+    local here=${PWD:A} root=$VCS_STATUS_WORKDIR
+    if [[ $here == $root* ]]; then
+      dir="${root:t}${here#$root}"
+      dir=${dir//\%/%%}
+    fi
+
+    local branch=${VCS_STATUS_LOCAL_BRANCH:-@${VCS_STATUS_COMMIT[1,7]}}
+    local color='%F{green}'
+    (( VCS_STATUS_NUM_STAGED || VCS_STATUS_NUM_UNSTAGED ||
+       VCS_STATUS_NUM_UNTRACKED || VCS_STATUS_NUM_CONFLICTED )) && color='%F{yellow}'
+
+    git=" ${color}"$''" ${branch//\%/%%}%f"
+    (( VCS_STATUS_COMMITS_BEHIND )) && git+=" %F{cyan}↓${VCS_STATUS_COMMITS_BEHIND}%f"
+    (( VCS_STATUS_COMMITS_AHEAD  )) && git+=" %F{cyan}↑${VCS_STATUS_COMMITS_AHEAD}%f"
+    (( VCS_STATUS_NUM_CONFLICTED )) && git+=" %F{red}~${VCS_STATUS_NUM_CONFLICTED}%f"
+    (( VCS_STATUS_NUM_STAGED     )) && git+=" %F{green}+${VCS_STATUS_NUM_STAGED}%f"
+    (( VCS_STATUS_NUM_UNSTAGED   )) && git+=" %F{yellow}!${VCS_STATUS_NUM_UNSTAGED}%f"
+    (( VCS_STATUS_NUM_UNTRACKED  )) && git+=" %F{blue}?%f"
+  fi
+  PROMPT="%F{8}%n@%m%f %F{blue}${dir}%f${git} %(?.%F{magenta}.%F{red})❯%f "
+}
+
+setopt prompt_percent no_prompt_subst
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd my_git_prompt
+fi
